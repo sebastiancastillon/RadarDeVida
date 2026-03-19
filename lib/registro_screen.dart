@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';import 'dart:io';
+import 'package:camera/camera.dart';
 import 'package:radardevida/app_drawer.dart'; // Corregido el path común
 import 'dart:convert'; // Para convertir la imagen a Base64
 import 'package:http/http.dart' as http; // Para enviar datos a internet
