@@ -1,35 +1,24 @@
-// Variable en memoria (se limpia si Vercel se apaga)
 let donadores = []; 
 
 export default function handler(req, res) {
-  // --- ESTO ES LO QUE ARREGLA EL ERROR DE SUBIDA (CORS) ---
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*'); // Permite cualquier origen
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Responder rápido a la verificación de conexión
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // ELIMINAR UN DONANTE
+  if (req.method === 'DELETE') {
+    const { id } = req.query; // Recibe el ID desde la URL
+    donadores = donadores.filter(d => d.id.toString() !== id.toString());
+    return res.status(200).json({ message: "Eliminado correctamente" });
   }
 
-  // Lógica para guardar donador
   if (req.method === 'POST') {
-    const { nombre, tipo_sangre, foto } = req.body;
-    const nuevoDonador = {
-      id: Date.now(),
-      nombre,
-      tipo_sangre,
-      foto,
-      fecha: new Date().toLocaleString()
-    };
-    donadores.push(nuevoDonador);
-    return res.status(201).json(nuevoDonador);
+    const nuevo = { ...req.body, id: Date.now(), fecha: new Date().toLocaleString() };
+    donadores.push(nuevo);
+    return res.status(201).json(nuevo);
   }
 
-  // Lógica para ver donadores
-  if (req.method === 'GET') {
-    return res.status(200).json(donadores);
-  }
+  if (req.method === 'GET') return res.status(200).json(donadores);
 }

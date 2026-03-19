@@ -89,14 +89,17 @@
             font-size: 14px;
         }
 
-        .status-tag { color: var(--text-dim); font-size: 13px; }
+        .status-tag { color: var(--text-dim); font-size: 13px; cursor: pointer; }
         
         .action-delete {
             color: var(--danger);
             text-decoration: none;
             font-size: 13px;
             font-weight: bold;
+            cursor: pointer;
         }
+
+        .action-delete:hover { text-decoration: underline; }
 
         .id-text { color: #58a6ff; font-size: 12px; display: block; }
     </style>
@@ -123,22 +126,29 @@
                 </tr>
             </thead>
             <tbody id="lista-donadores">
-                </tbody>
+                <tr><td colspan="5" style="text-align:center; padding:40px; color:var(--text-dim)">Cargando registros...</td></tr>
+            </tbody>
         </table>
     </div>
 
     <script>
+        // FUNCIÓN PARA OBTENER DATOS
         async function actualizar() {
             try {
                 const res = await fetch('/api/donadores');
                 const datos = await res.json();
                 const contenedor = document.getElementById('lista-donadores');
                 
+                if (datos.length === 0) {
+                    contenedor.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--text-dim)">No hay registros detectados</td></tr>';
+                    return;
+                }
+
                 contenedor.innerHTML = datos.map(d => `
                     <tr>
                         <td>
                             <span class="id-text">${d.id}</span>
-                            <small style="color:var(--text-dim)">${d.fecha.split(',')[0]}</small>
+                            <small style="color:var(--text-dim)">${d.fecha ? d.fecha.split(',')[0] : 'Hoy'}</small>
                         </td>
                         <td>
                             <div class="user-info">
@@ -149,18 +159,45 @@
                                 </div>
                             </div>
                         </td>
-                        <td><span class="blood-badge">${d.tipo_sangre || d.tipo}</span></td>
+                        <td><span class="blood-badge">${d.tipo_sangre || d.tipo || 'N/A'}</span></td>
                         <td><span class="status-tag">📍 Ver Mapa</span></td>
-                        <td><a href="#" class="action-delete">Eliminar</a></td>
+                        <td>
+                            <a href="javascript:void(0)" 
+                               onclick="borrarDonador('${d.id}')" 
+                               class="action-delete">Eliminar</a>
+                        </td>
                     </tr>
-                `).join('') || '<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--text-dim)">No hay registros detectados</td></tr>';
+                `).join('');
             } catch (e) {
                 console.error("Error cargando datos:", e);
             }
         }
 
-        // Auto-actualizar cada 10 segundos
-        setInterval(actualizar, 10000);
+        // FUNCIÓN PARA ELIMINAR
+        async function borrarDonador(id) {
+            if (!confirm("¿Seguro que quieres eliminar este registro?")) return;
+
+            try {
+                // Enviamos el ID como parámetro en la URL (?id=...)
+                const res = await fetch(`/api/donadores?id=${id}`, {
+                    method: 'DELETE',
+                });
+
+                if (res.ok) {
+                    actualizar(); // Refresca la tabla tras borrar
+                } else {
+                    alert("Error al intentar eliminar el registro.");
+                }
+            } catch (e) {
+                console.error("Error al borrar:", e);
+                alert("No se pudo conectar con el servidor para eliminar.");
+            }
+        }
+
+        // Auto-actualizar cada 15 segundos
+        setInterval(actualizar, 15000);
+        
+        // Carga inicial
         actualizar();
     </script>
 </body>
