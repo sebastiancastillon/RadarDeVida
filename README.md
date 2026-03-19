@@ -38,24 +38,24 @@ A continuación se muestra el flujo de la plataforma, desde la aplicación móvi
   <tr>
     <td width="50%" align="center">
       <h3>📱 App Móvil: Inicio</h3>
-      <img src="assets/screenshots/app_inicio.jpeg" alt="App de Inicio de Radar de Vida" width="90%" style="border-radius:12px;">
+      <img src="/screenshots/app_inicio.jpeg" alt="App de Inicio de Radar de Vida" width="90%" style="border-radius:12px;">
       <p><i>Pantalla de bienvenida para donantes.</i></p>
     </td>
     <td width="50%" align="center">
       <h3>📱 App Móvil: Registro</h3>
-      <img src="assets/screenshots/app_registro.jpeg" alt="App de Registro de Donantes" width="90%" style="border-radius:12px;">
+      <img src="/screenshots/app_registro.jpeg" alt="App de Registro de Donantes" width="90%" style="border-radius:12px;">
       <p><i>Formulario con captura de selfie biométrica.</i></p>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
       <h3>🗺️ Mapa de Donantes</h3>
-      <img src="assets/screenshots/app_mapa.jpeg" alt="Mapa de Donantes en Colima" width="90%" style="border-radius:12px;">
+      <img src="/screenshots/app_mapa.jpeg" alt="Mapa de Donantes en Colima" width="90%" style="border-radius:12px;">
       <p><i>Ubicación en tiempo real de la flotilla disponible.</i></p>
     </td>
     <td width="50%" align="center">
       <h3>🖥️ Web: Panel de Administración</h3>
-      <img src="assets/screenshots/web_admin.jpeg" alt="Panel de Administrador Web de Vercel" width="90%" style="border-radius:12px;">
+      <img src="/screenshots/web_admin.jpeg" alt="Panel de Administrador Web de Vercel" width="90%" style="border-radius:12px;">
       <p><i>Control total con Dark Mode profesional.</i></p>
     </td>
   </tr>
