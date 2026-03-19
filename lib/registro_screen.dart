@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';import 'dart:io';
 import 'package:radardevida/app_drawer.dart'; // Corregido el path común
+import 'dart:convert'; // Para convertir la imagen a Base64
+import 'package:http/http.dart' as http; // Para enviar datos a internet
 
 class RegistroScreen extends StatefulWidget {
   const RegistroScreen({super.key});
@@ -162,11 +164,56 @@ class _RegistroScreenState extends State<RegistroScreen> {
               // El botón solo se activa si hay foto Y nombre
               onPressed: (_imageFile == null || _nombreController.text.isEmpty)
                   ? null
-                  : () {
+                  : () async {
+                      // 1. Mostrar mensaje de carga
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text("Enviando a Panel de Administración...")),
                       );
-                      // Aquí llamaremos a la función de Vercel próximamente
+
+                      try {
+                        // 2. Preparar la imagen: Convertirla a Base64
+                        final bytes = await File(_imageFile!.path).readAsBytes();
+                        String base64Image = "data:image/png;base64,${base64Encode(bytes)}";
+
+                        // 3. Tu URL de Vercel (Asegúrate de que incluya /api/donadores)
+                        final url = Uri.parse('https://radar-de-vida-sebastiancastillons-projects.vercel.app/api/donadores');
+
+                        // 4. Enviar la petición POST
+                        final response = await http.post(
+                          url,
+                          headers: {"Content-Type": "application/json"},
+                          body: jsonEncode({
+                            "nombre": _nombreController.text,
+                            "tipo_sangre": _tipoSangre,
+                            "foto": base64Image,
+                          }),
+                        );
+
+                        // 5. Verificar si el servidor respondió bien
+                        if (response.statusCode == 201 || response.statusCode == 200) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("✅ ¡Donante registrado con éxito!"),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          // Opcional: Limpiar el formulario después de subir
+                          setState(() {
+                            _imageFile = null;
+                            _nombreController.clear();
+                          });
+                        } else {
+                          throw Exception('Error del servidor: ${response.statusCode}');
+                        }
+                      } catch (e) {
+                        // 6. Manejo de errores de conexión
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("❌ Error al enviar datos: $e"),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
