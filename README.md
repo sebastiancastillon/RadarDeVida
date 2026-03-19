@@ -1,17 +1,75 @@
-# radardevida
+# 🩸 Radar de Vida
+> **Sistema inteligente de gestión y registro de donantes de sangre en tiempo real.**
 
-A new Flutter project.
+![Vercel Deployment](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 📱 Sobre el Proyecto
+**Radar de Vida** es una plataforma diseñada para conectar donantes de sangre con centros de salud de manera inmediata. El sistema consta de una aplicación móvil para el registro en sitio y un panel administrativo web para el control de la flotilla de donantes.
 
-A few resources to get you started if this is your first Flutter project:
+### 🔑 Funciones Clave
+* **Registro Biométrico:** Los donantes suben una selfie y sus datos básicos desde la App.
+* **Panel de Control Dark Mode:** Interfaz administrativa de alto rendimiento para visualización de datos.
+* **Arquitectura Serverless:** Backend escalable que no requiere mantenimiento de servidores físicos.
+* **Gestión de Registros:** Capacidad de actualizar y eliminar registros en tiempo real.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🛠️ Stack Tecnológico
+
+| Componente | Tecnología |
+| :--- | :--- |
+| **App Móvil** | Flutter (Dart) |
+| **Backend** | Vercel Edge Functions (Node.js) |
+| **Frontend Web** | HTML5 / CSS3 / JavaScript Moderno |
+| **Infraestructura** | Vercel Cloud |
+
+---
+---
+
+## 📸 Screenshots del Sistema
+
+A continuación se muestra el flujo de la plataforma, desde la aplicación móvil hasta el panel de control administrativo web.
+
+<table width="100%">
+  <tr>
+    <td width="50%" align="center">
+      <h3>📱 App Móvil: Inicio</h3>
+      <img src="assets/screenshots/app_inicio.png" alt="App de Inicio de Radar de Vida" width="90%" style="border-radius:12px;">
+      <p><i>Pantalla de bienvenida para donantes.</i></p>
+    </td>
+    <td width="50%" align="center">
+      <h3>📱 App Móvil: Registro</h3>
+      <img src="assets/screenshots/app_registro.png" alt="App de Registro de Donantes" width="90%" style="border-radius:12px;">
+      <p><i>Formulario con captura de selfie biométrica.</i></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <h3>🗺️ Mapa de Donantes</h3>
+      <img src="assets/screenshots/app_mapa.png" alt="Mapa de Donantes en Colima" width="90%" style="border-radius:12px;">
+      <p><i>Ubicación en tiempo real de la flotilla disponible.</i></p>
+    </td>
+    <td width="50%" align="center">
+      <h3>🖥️ Web: Panel de Administración</h3>
+      <img src="assets/screenshots/web_admin.png" alt="Panel de Administrador Web de Vercel" width="90%" style="border-radius:12px;">
+      <p><i>Control total con Dark Mode profesional.</i></p>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 📂 Estructura del Repositorio
+
+```text
+├── api/                # Backend: Funciones Serverless en Node.js
+├── public/             # Frontend: Panel de administración web
+├── lib/                # Móvil: Código fuente de la App en Flutter
+├── vercel.json         # Configuración de CORS y Rutas
+└── README.md           # Documentación
+
+
