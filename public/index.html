@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Radar de Vida</title>
+    <style>
+        body { font-family: system-ui; background: #f0f2f5; padding: 20px; }
+        .card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px; border: 2px solid #B71C1C; }
+        .tipo { background: #B71C1C; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🩸 Administrador: Donantes Recientes</h1>
+    <div id="lista">Cargando donantes...</div>
+
+    <script>
+        async function actualizar() {
+            const res = await fetch('/api/donadores');
+            const datos = await res.json();
+            const contenedor = document.getElementById('lista');
+            contenedor.innerHTML = datos.map(d => `
+                <div class="card">
+                    <img src="${d.foto}" alt="selfie">
+                    <div>
+                        <strong>${d.nombre}</strong> <br>
+                        <small>${d.fecha}</small>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <span class="tipo">${d.tipo}</span>
+                    </div>
+                </div>
+            `).join('') || 'No hay registros aún.';
+        }
+        setInterval(actualizar, 3000); // Se actualiza solo cada 3 segundos
+        actualizar();
+    </script>
+</body>
+</html>

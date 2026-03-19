@@ -1,0 +1,35 @@
+name: radardevida
+description: "Aplicación para conectar donadores de sangre y hospitales en un radio de 1km."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # --- MAPA GRATUITO Y COORDENADAS ---
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.1      # <--- ESTE TE FALTABA
+
+  # --- SENSORES Y GPS ---
+  geolocator: ^13.0.1
+  camera: ^0.11.0+1
+
+  # --- SERVICIOS Y ARCHIVOS ---
+  http: ^1.2.2
+  path_provider: ^2.1.2
+  path: ^1.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
