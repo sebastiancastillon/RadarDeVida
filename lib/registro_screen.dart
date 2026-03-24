@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';import 'dart:io';
+import 'dart:io';
 import 'package:camera/camera.dart';
-import 'package:radardevida/app_drawer.dart'; // Corregido el path común
-import 'dart:convert'; // Para convertir la imagen a Base64
-import 'package:http/http.dart' as http; // Para enviar datos a internet
+import 'package:shared_preferences/shared_preferences.dart'; // Para guardar la sesión
+import 'package:radardevida/app_drawer.dart'; 
+import 'dart:convert'; 
+import 'package:http/http.dart' as http; 
 
 class RegistroScreen extends StatefulWidget {
   const RegistroScreen({super.key});
@@ -16,27 +17,58 @@ class _RegistroScreenState extends State<RegistroScreen> {
   CameraController? _controller;
   Future<void>? _initializeControllerFuture;
   XFile? _imageFile;
+  
   String _tipoSangre = "O+";
   final TextEditingController _nombreController = TextEditingController();
+  
+  List<CameraDescription> _cameras = [];
+  int _camaraActual = 1; // 1 = Frontal, 0 = Trasera por lo general
 
   @override
   void initState() {
     super.initState();
+    _cargarSesion(); // Cargar datos guardados previamente
     _initCamera();
   }
 
+  // --- FUNCIÓN PARA CARGAR DATOS GUARDADOS ---
+  Future<void> _cargarSesion() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _nombreController.text = prefs.getString('nombre') ?? '';
+      _tipoSangre = prefs.getString('tipoSangre') ?? 'O+';
+    });
+  }
+
+  // --- FUNCIÓN PARA GUARDAR DATOS ---
+  Future<void> _guardarSesion() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('nombre', _nombreController.text);
+    await prefs.setString('tipoSangre', _tipoSangre);
+  }
+
   Future<void> _initCamera() async {
-    final cameras = await availableCameras();
-    if (cameras.isEmpty) return;
+    _cameras = await availableCameras();
+    if (_cameras.isEmpty) return;
 
-    // BUSCAR LA CÁMARA FRONTAL (SELFIE)
-    final frontal = cameras.firstWhere(
-      (camera) => camera.lensDirection == CameraLensDirection.front,
-      orElse: () => cameras.first,
-    );
+    // Buscar la cámara frontal para iniciar
+    _camaraActual = _cameras.indexWhere((c) => c.lensDirection == CameraLensDirection.front);
+    if (_camaraActual == -1) _camaraActual = 0; // Si no hay frontal, usa la que haya
 
+    _iniciarControladorCamara(_cameras[_camaraActual]);
+  }
+
+  // --- FUNCIÓN PARA CAMBIAR ENTRE CÁMARAS ---
+  void _cambiarCamara() {
+    if (_cameras.length < 2) return; // Si solo hay 1 cámara, no hace nada
+    
+    _camaraActual = _camaraActual == 0 ? 1 : 0;
+    _iniciarControladorCamara(_cameras[_camaraActual]);
+  }
+
+  Future<void> _iniciarControladorCamara(CameraDescription cameraDescription) async {
     _controller = CameraController(
-      frontal,
+      cameraDescription,
       ResolutionPreset.medium,
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
@@ -79,7 +111,6 @@ class _RegistroScreenState extends State<RegistroScreen> {
             ),
             const SizedBox(height: 15),
 
-            // --- VISOR DE CÁMARA CORREGIDO (SIN ESTIRAR) ---
             Container(
               height: 300,
               width: double.infinity,
@@ -95,16 +126,31 @@ class _RegistroScreenState extends State<RegistroScreen> {
                         future: _initializeControllerFuture,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.done && _controller != null) {
-                            // Aplicamos FittedBox + AspectRatio para evitar el estiramiento
-                            return Center(
-                              child: FittedBox(
-                                fit: BoxFit.cover,
-                                child: SizedBox(
-                                  width: _controller!.value.previewSize!.height,
-                                  height: _controller!.value.previewSize!.width,
-                                  child: CameraPreview(_controller!),
+                            return Stack(
+                              children: [
+                                Center(
+                                  child: FittedBox(
+                                    fit: BoxFit.cover,
+                                    child: SizedBox(
+                                      width: _controller!.value.previewSize!.height,
+                                      height: _controller!.value.previewSize!.width,
+                                      child: CameraPreview(_controller!),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                // BOTÓN PARA CAMBIAR CÁMARA
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.black54,
+                                    child: IconButton(
+                                      icon: const Icon(Icons.cameraswitch, color: Colors.white),
+                                      onPressed: _cambiarCamara,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             );
                           } else {
                             return const Center(child: CircularProgressIndicator());
@@ -122,8 +168,8 @@ class _RegistroScreenState extends State<RegistroScreen> {
               children: [
                 ElevatedButton.icon(
                   onPressed: _takePicture,
-                  icon: const Icon(Icons.camera_front),
-                  label: const Text("Tomar Selfie"),
+                  icon: const Icon(Icons.camera),
+                  label: const Text("Tomar Foto"),
                 ),
                 if (_imageFile != null)
                   TextButton.icon(
@@ -136,7 +182,6 @@ class _RegistroScreenState extends State<RegistroScreen> {
 
             const Divider(height: 40),
 
-            // --- FORMULARIO DE DATOS ---
             TextField(
               controller: _nombreController,
               decoration: const InputDecoration(
@@ -144,7 +189,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.person),
               ),
-              onChanged: (val) => setState(() {}), // Para refrescar el botón
+              onChanged: (val) => setState(() {}),
             ),
             const SizedBox(height: 15),
             DropdownButtonFormField(
@@ -162,24 +207,19 @@ class _RegistroScreenState extends State<RegistroScreen> {
             const SizedBox(height: 30),
 
             ElevatedButton(
-              // El botón solo se activa si hay foto Y nombre
               onPressed: (_imageFile == null || _nombreController.text.isEmpty)
                   ? null
                   : () async {
-                      // 1. Mostrar mensaje de carga
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text("Enviando a Panel de Administración...")),
                       );
 
                       try {
-                        // 2. Preparar la imagen: Convertirla a Base64
                         final bytes = await File(_imageFile!.path).readAsBytes();
                         String base64Image = "data:image/png;base64,${base64Encode(bytes)}";
 
-                        // 3. Tu URL de Vercel (Asegúrate de que incluya /api/donadores)
                         final url = Uri.parse('https://radar-de-vida-sebastiancastillons-projects.vercel.app/api/donadores');
 
-                        // 4. Enviar la petición POST
                         final response = await http.post(
                           url,
                           headers: {"Content-Type": "application/json"},
@@ -190,24 +230,24 @@ class _RegistroScreenState extends State<RegistroScreen> {
                           }),
                         );
 
-                        // 5. Verificar si el servidor respondió bien
                         if (response.statusCode == 201 || response.statusCode == 200) {
+                          // GUARDAMOS LA SESIÓN SI EL ENVÍO FUE EXITOSO
+                          await _guardarSesion();
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text("✅ ¡Donante registrado con éxito!"),
                               backgroundColor: Colors.green,
                             ),
                           );
-                          // Opcional: Limpiar el formulario después de subir
                           setState(() {
                             _imageFile = null;
-                            _nombreController.clear();
+                            // Ya NO limpiamos el nombre para simular la "sesión guardada"
                           });
                         } else {
-                          throw Exception('Error del servidor: ${response.statusCode}');
+                          throw Exception('Error del servidor');
                         }
                       } catch (e) {
-                        // 6. Manejo de errores de conexión
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text("❌ Error al enviar datos: $e"),

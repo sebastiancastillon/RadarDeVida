@@ -162,12 +162,14 @@
                         <td><span class="blood-badge">${d.tipo_sangre || d.tipo || 'N/A'}</span></td>
 // REEMPLAZA ESTA LÍNEA EN TU INDEX.HTML:
 <td>
-    <a href="https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lng}" 
+    <td>
+    <a href="https://www.google.com/maps?q=${d.lat},${d.lng}" 
        target="_blank" 
        class="status-tag" 
        style="text-decoration: none; display: flex; align-items: center; gap: 5px;">
        📍 <span style="text-decoration: underline;">Ver en Google Maps</span>
     </a>
+</td>
 </td>                        <td>
                             <a href="javascript:void(0)" 
                                onclick="borrarDonador('${d.id}')" 

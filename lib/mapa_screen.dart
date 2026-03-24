@@ -1,3 +1,4 @@
+import 'dart:async'; // Necesario para el Stream
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -14,18 +15,36 @@ class MapaScreen extends StatefulWidget {
 class _MapaScreenState extends State<MapaScreen> {
   LatLng? _ubicacionActual;
   final MapController _mapController = MapController();
+  StreamSubscription<Position>? _positionStream; // Suscripción en tiempo real
 
   @override
   void initState() {
     super.initState();
-    _determinarPosicion();
+    _iniciarRastreo();
   }
 
-  Future<void> _determinarPosicion() async {
-    Position position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _ubicacionActual = LatLng(position.latitude, position.longitude);
+  void _iniciarRastreo() async {
+    // Verificamos permisos primero (Opcional pero recomendado)
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    // Escuchamos la ubicación todo el tiempo
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 5, // Se actualiza si te mueves 5 metros
+      ),
+    ).listen((Position position) {
+      setState(() {
+        _ubicacionActual = LatLng(position.latitude, position.longitude);
+      });
     });
+  }
+
+  @override
+  void dispose() {
+    _positionStream?.cancel(); // Importante apagar el GPS al salir de la pantalla
+    super.dispose();
   }
 
   @override
@@ -42,18 +61,15 @@ class _MapaScreenState extends State<MapaScreen> {
                 initialZoom: 14.5,
               ),
               children: [
-                // 1. Capa de diseño del mapa (OpenStreetMap)
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.radardevida.app',
                 ),
-                
-                // 2. Radio de 1 KM (Geocerca)
                 CircleLayer(
                   circles: [
                     CircleMarker(
                       point: _ubicacionActual!,
-                      radius: 1000, // 1000 metros = 1 KM
+                      radius: 2000, // Lo subimos a 2 KM como pediste antes
                       useRadiusInMeter: true,
                       color: Colors.red.withOpacity(0.2),
                       borderColor: Colors.red,
@@ -61,8 +77,6 @@ class _MapaScreenState extends State<MapaScreen> {
                     ),
                   ],
                 ),
-
-                // 3. Marcador de tu posición
                 MarkerLayer(
                   markers: [
                     Marker(

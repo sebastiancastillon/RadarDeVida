@@ -10,9 +10,9 @@ export default function handler(req, res) {
   if (req.method === 'POST') {
     const { nombre, tipo_sangre, foto } = req.body;
     
-    // Generar coordenadas aleatorias en Colima para la demo
-    const lat = 19.2433 + (Math.random() - 0.5) * 0.02;
-    const lng = -103.725 + (Math.random() - 0.5) * 0.02;
+    // Generar coordenadas aleatorias en Colima (Radio de ~2km usando 0.04)
+    const lat = req.body.lat || (19.2433 + (Math.random() - 0.5) * 0.04);
+    const lng = req.body.lng || (-103.725 + (Math.random() - 0.5) * 0.04);
 
     const nuevoDonador = {
       id: Date.now(),
@@ -23,43 +23,16 @@ export default function handler(req, res) {
       lat: lat,
       lng: lng
     };
+    
     donadores.push(nuevoDonador);
     return res.status(201).json(nuevoDonador);
   }
 
   if (req.method === 'DELETE') {
-    const { id } = req.query;
+    const { id } = req.query; // Recibe el ID desde la URL
     donadores = donadores.filter(d => d.id.toString() !== id.toString());
-    return res.status(200).json({ message: "Eliminado" });
+    return res.status(200).json({ message: "Eliminado correctamente" });
   }
 
   if (req.method === 'GET') return res.status(200).json(donadores);
 }
-  // ELIMINAR UN DONANTE
-  if (req.method === 'DELETE') {
-    const { id } = req.query; // Recibe el ID desde la URL
-    donadores = donadores.filter(d => d.id.toString() !== id.toString());
-    return res.status(200).json({ message: "Eliminado correctamente" });
-
-    
-  }
-
-  if (req.method === 'POST') {
-    const nuevo = { ...req.body, id: Date.now(), fecha: new Date().toLocaleString() };
-    donadores.push(nuevo);
-    return res.status(201).json(nuevo);
-// Dentro de tu if (req.method === 'POST')
-const nuevoDonador = {
-  id: Date.now(),
-  nombre,
-  tipo_sangre,
-  foto,
-  fecha: new Date().toLocaleString(),
-  // Si no vienen coordenadas de la App, ponemos unas de Colima Centro
-  lat: req.body.lat || 19.2433, 
-  lng: req.body.lng || -103.725
-};
-
-  }
-
-  if (req.method === 'GET') return res.status(200).json(donadores);
