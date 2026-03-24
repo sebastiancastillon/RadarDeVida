@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:camera/camera.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Para guardar la sesión
 import 'package:radardevida/app_drawer.dart'; 
 import 'dart:convert'; 
 import 'package:http/http.dart' as http; 
@@ -27,24 +26,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
   @override
   void initState() {
     super.initState();
-    _cargarSesion(); // Cargar datos guardados previamente
     _initCamera();
-  }
-
-  // --- FUNCIÓN PARA CARGAR DATOS GUARDADOS ---
-  Future<void> _cargarSesion() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _nombreController.text = prefs.getString('nombre') ?? '';
-      _tipoSangre = prefs.getString('tipoSangre') ?? 'O+';
-    });
-  }
-
-  // --- FUNCIÓN PARA GUARDAR DATOS ---
-  Future<void> _guardarSesion() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('nombre', _nombreController.text);
-    await prefs.setString('tipoSangre', _tipoSangre);
   }
 
   Future<void> _initCamera() async {
@@ -231,18 +213,17 @@ class _RegistroScreenState extends State<RegistroScreen> {
                         );
 
                         if (response.statusCode == 201 || response.statusCode == 200) {
-                          // GUARDAMOS LA SESIÓN SI EL ENVÍO FUE EXITOSO
-                          await _guardarSesion();
-
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text("✅ ¡Donante registrado con éxito!"),
                               backgroundColor: Colors.green,
                             ),
                           );
+                          // AHORA EL FORMULARIO SE LIMPIA DESPUÉS DE SUBIR
                           setState(() {
                             _imageFile = null;
-                            // Ya NO limpiamos el nombre para simular la "sesión guardada"
+                            _nombreController.clear(); 
+                            _tipoSangre = "O+"; // Lo regresamos al valor por defecto
                           });
                         } else {
                           throw Exception('Error del servidor');
