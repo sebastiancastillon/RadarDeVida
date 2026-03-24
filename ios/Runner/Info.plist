@@ -5,6 +5,10 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
+	<key>NSLocationWhenInUseUsageDescription</key>
+<string>Radar de Vida necesita tu ubicación para que los centros de salud puedan ubicarte en el mapa de donantes cercanos.</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>Radar de Vida necesita tu ubicación para el mapa de donantes cercanos.</string>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Radardevida</string>

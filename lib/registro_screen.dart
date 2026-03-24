@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:geolocator/geolocator.dart'; // <--- AGREGAMOS ESTO
 import 'package:radardevida/app_drawer.dart'; 
 import 'dart:convert'; 
 import 'package:http/http.dart' as http; 
@@ -21,7 +22,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
   final TextEditingController _nombreController = TextEditingController();
   
   List<CameraDescription> _cameras = [];
-  int _camaraActual = 1; // 1 = Frontal, 0 = Trasera por lo general
+  int _camaraActual = 1;
 
   @override
   void initState() {
@@ -29,21 +30,44 @@ class _RegistroScreenState extends State<RegistroScreen> {
     _initCamera();
   }
 
+  // --- FUNCIÓN PARA OBTENER LA UBICACIÓN REAL (Manejando permisos) ---
+  Future<Position> _determinarPosicion() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Verificar si los servicios de ubicación están activados
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('El GPS está desactivado. Actívalo para continuar.');
+    }
+
+    // Verificar permisos
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Permiso de ubicación denegado.');
+      }
+    }
+    
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error('Permisos de ubicación denegados permanentemente.');
+    }
+
+    // Si todo está bien, obtenemos la posición actual
+    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  }
+
   Future<void> _initCamera() async {
     _cameras = await availableCameras();
     if (_cameras.isEmpty) return;
-
-    // Buscar la cámara frontal para iniciar
     _camaraActual = _cameras.indexWhere((c) => c.lensDirection == CameraLensDirection.front);
-    if (_camaraActual == -1) _camaraActual = 0; // Si no hay frontal, usa la que haya
-
+    if (_camaraActual == -1) _camaraActual = 0;
     _iniciarControladorCamara(_cameras[_camaraActual]);
   }
 
-  // --- FUNCIÓN PARA CAMBIAR ENTRE CÁMARAS ---
   void _cambiarCamara() {
-    if (_cameras.length < 2) return; // Si solo hay 1 cámara, no hace nada
-    
+    if (_cameras.length < 2) return;
     _camaraActual = _camaraActual == 0 ? 1 : 0;
     _iniciarControladorCamara(_cameras[_camaraActual]);
   }
@@ -54,7 +78,6 @@ class _RegistroScreenState extends State<RegistroScreen> {
       ResolutionPreset.medium,
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
-
     _initializeControllerFuture = _controller!.initialize();
     if (mounted) setState(() {});
   }
@@ -70,9 +93,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
     try {
       await _initializeControllerFuture;
       final image = await _controller!.takePicture();
-      setState(() {
-        _imageFile = image;
-      });
+      setState(() => _imageFile = image);
     } catch (e) {
       debugPrint("Error al tomar foto: $e");
     }
@@ -92,7 +113,6 @@ class _RegistroScreenState extends State<RegistroScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 15),
-
             Container(
               height: 300,
               width: double.infinity,
@@ -120,7 +140,6 @@ class _RegistroScreenState extends State<RegistroScreen> {
                                     ),
                                   ),
                                 ),
-                                // BOTÓN PARA CAMBIAR CÁMARA
                                 Positioned(
                                   top: 10,
                                   right: 10,
@@ -142,9 +161,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
                     : Image.file(File(_imageFile!.path), fit: BoxFit.cover),
               ),
             ),
-
             const SizedBox(height: 15),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -161,9 +178,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
                   ),
               ],
             ),
-
             const Divider(height: 40),
-
             TextField(
               controller: _nombreController,
               decoration: const InputDecoration(
@@ -185,9 +200,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
                   .toList(),
               onChanged: (val) => setState(() => _tipoSangre = val.toString()),
             ),
-
             const SizedBox(height: 30),
-
             ElevatedButton(
               onPressed: (_imageFile == null || _nombreController.text.isEmpty)
                   ? null
@@ -197,11 +210,16 @@ class _RegistroScreenState extends State<RegistroScreen> {
                       );
 
                       try {
+                        // 1. OBTENER LA UBICACIÓN REAL JUSTO ANTES DE SUBIR
+                        Position position = await _determinarPosicion();
+
+                        // 2. Preparar imagen
                         final bytes = await File(_imageFile!.path).readAsBytes();
                         String base64Image = "data:image/png;base64,${base64Encode(bytes)}";
 
                         final url = Uri.parse('https://radar-de-vida-sebastiancastillons-projects.vercel.app/api/donadores');
 
+                        // 3. ENVIAR DATOS CON LATITUD Y LONGITUD
                         final response = await http.post(
                           url,
                           headers: {"Content-Type": "application/json"},
@@ -209,6 +227,8 @@ class _RegistroScreenState extends State<RegistroScreen> {
                             "nombre": _nombreController.text,
                             "tipo_sangre": _tipoSangre,
                             "foto": base64Image,
+                            "lat": position.latitude, // <--- AGREGAMOS LAT
+                            "lng": position.longitude, // <--- AGREGAMOS LNG
                           }),
                         );
 
@@ -219,11 +239,10 @@ class _RegistroScreenState extends State<RegistroScreen> {
                               backgroundColor: Colors.green,
                             ),
                           );
-                          // AHORA EL FORMULARIO SE LIMPIA DESPUÉS DE SUBIR
                           setState(() {
                             _imageFile = null;
                             _nombreController.clear(); 
-                            _tipoSangre = "O+"; // Lo regresamos al valor por defecto
+                            _tipoSangre = "O+";
                           });
                         } else {
                           throw Exception('Error del servidor');
