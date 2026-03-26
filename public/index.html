@@ -7,13 +7,13 @@
     <style>
         :root {
             /* TEMA CLARO */
-            --bg-color: #ffffff; /* Fondo blanco */
-            --card-bg: #f8f9fa; /* Fondo de la tabla muy claro */
-            --text-main: #000000; /* Texto principal negro */
-            --text-dim: #6c757d; /* Texto secundario gris */
-            --accent: #B71C1C; /* Rojo oscuro para el botón */
-            --danger: #dc3545; /* Rojo para eliminar */
-            --border-color: #dee2e6; /* Gris claro para bordes */
+            --bg-color: #ffffff; 
+            --card-bg: #f8f9fa; 
+            --text-main: #000000; 
+            --text-dim: #6c757d; 
+            --accent: #B71C1C; 
+            --danger: #dc3545; 
+            --border-color: #dee2e6; 
         }
 
         body {
@@ -28,104 +28,110 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
-        h1 { 
-            font-size: 28px; 
-            margin: 0; 
-            color: #000000; /* Control de donantes en negro */
-        }
-        
-        p { 
-            color: #d32f2f; /* Gestión de registros en rojo */
-            margin: 5px 0 0 0; 
-            font-weight: 500;
-        }
+        h1 { font-size: 28px; margin: 0; color: #000000; }
+        p { color: #d32f2f; margin: 5px 0 0 0; font-weight: 500; }
 
         .btn-update {
-            background: var(--accent); /* Fondo rojo */
-            color: #000000; /* Texto negro */
-            border: 2px solid #000000; /* Borde negro para que resalte */
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
+            background: var(--accent); color: #000000; 
+            border: 2px solid #000000; padding: 10px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: bold;
             transition: 0.3s;
         }
+        .btn-update:hover { background: #000000; color: #ffffff; }
 
-        .btn-update:hover { 
-            background: #000000; 
-            color: #ffffff; 
-            border-color: #000000;
+        /* --- NUEVOS ESTILOS DEL PANEL DE EMERGENCIA --- */
+        .emergency-panel {
+            background: #fff5f5;
+            border: 2px solid #dc3545;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);
         }
+
+        .emergency-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .emergency-input {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .btn-alert {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(220, 53, 69, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+
+        .active-alert-box {
+            display: none; /* Se oculta por defecto */
+            text-align: center;
+            background: #dc3545;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .counter-number {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+            line-height: 1;
+        }
+
+        .btn-cancel {
+            background: white;
+            color: #dc3545;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        /* ----------------------------------------------- */
 
         .table-container {
             background: var(--card-bg);
             border-radius: 12px;
             overflow: hidden;
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* Sombra suave */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            background: #e9ecef; /* Encabezado gris clarito */
-            padding: 15px;
-            color: var(--text-main);
-            font-size: 13px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: middle;
-        }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #e9ecef; padding: 15px; font-size: 13px; border-bottom: 2px solid var(--border-color); }
+        td { padding: 15px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
 
         .user-info { display: flex; align-items: center; gap: 12px; }
-        .user-info img { 
-            width: 45px; height: 45px; 
-            border-radius: 8px; object-fit: cover; 
-            border: 1px solid var(--border-color);
-        }
-
-        .blood-badge {
-            background: rgba(220, 53, 69, 0.1);
-            color: #d32f2f;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 14px;
-            border: 1px solid rgba(220, 53, 69, 0.2);
-        }
-
-        .status-tag { color: var(--text-dim); font-size: 13px; cursor: pointer; }
-        
-        .action-delete {
-            color: var(--danger);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 6px 10px;
-            border-radius: 4px;
-            transition: 0.2s;
-        }
-
-        .action-delete:hover { 
-            background: rgba(220, 53, 69, 0.1); 
-            text-decoration: underline; 
-        }
-
+        .user-info img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-color); }
+        .blood-badge { background: rgba(220, 53, 69, 0.1); color: #d32f2f; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 14px; }
+        .status-tag { color: var(--text-dim); font-size: 13px; }
+        .action-delete { color: var(--danger); text-decoration: none; font-size: 13px; font-weight: bold; cursor: pointer; }
         .id-text { color: #0056b3; font-size: 12px; display: block; font-weight: 500;}
     </style>
 </head>
@@ -136,7 +142,34 @@
             <h1>Control de Donantes</h1>
             <p>Gestión de registros en tiempo real</p>
         </div>
-        <button class="btn-update" onclick="actualizar()">↻ Actualizar Tabla</button>
+        <button class="btn-update" onclick="actualizarTodo()">↻ Actualizar Datos</button>
+    </div>
+
+    <div class="emergency-panel">
+        <div id="form-crear-alerta" class="emergency-form">
+            <h3 style="margin:0; color:#dc3545;">🚨 Centro de Alertas</h3>
+            <select id="input-sangre" class="emergency-input" style="flex: 0.5;">
+                <option value="Cualquiera">Cualquier tipo de sangre</option>
+                <option value="O+">O Positivo (O+)</option>
+                <option value="O-">O Negativo (O-)</option>
+                <option value="A+">A Positivo (A+)</option>
+                <option value="A-">A Negativo (A-)</option>
+                <option value="B+">B Positivo (B+)</option>
+                <option value="B-">B Negativo (B-)</option>
+                <option value="AB+">AB Positivo (AB+)</option>
+                <option value="AB-">AB Negativo (AB-)</option>
+            </select>
+            <input type="text" id="input-hospital" class="emergency-input" placeholder="Ej. Hospital Regional Universitario" value="Hospital Regional Universitario">
+            <button class="btn-alert" onclick="emitirAlerta()">EMITIR ALERTA PUSH</button>
+        </div>
+
+        <div id="box-alerta-activa" class="active-alert-box">
+            <h2 style="margin:0;">🚨 EMERGENCIA ACTIVA: Se requiere sangre <span id="sangre-requerida"></span></h2>
+            <p style="color:white; opacity:0.9; margin:5px 0 0 0;">Hospital: <span id="hospital-destino"></span></p>
+            <div class="counter-number" id="donadores-camino">0</div>
+            <p style="color:white; margin:0 0 15px 0; font-weight:bold;">DONADORES EN CAMINO</p>
+            <button class="btn-cancel" onclick="cancelarAlerta()">Finalizar Emergencia</button>
+        </div>
     </div>
 
     <div class="table-container">
@@ -157,8 +190,72 @@
     </div>
 
     <script>
-        // FUNCIÓN PARA OBTENER DATOS
-        async function actualizar() {
+        // --- LÓGICA DE EMERGENCIAS ---
+        async function revisarEmergencia() {
+            try {
+                const res = await fetch('/api/emergencias');
+                
+                // Si la ruta no existe todavía o hay error, no hacemos nada para que no se caiga la página
+                if (!res.ok) return; 
+                
+                const datos = await res.json();
+                
+                const formAlerta = document.getElementById('form-crear-alerta');
+                const boxAlerta = document.getElementById('box-alerta-activa');
+
+                if (datos && datos.activa) {
+                    // Hay emergencia
+                    formAlerta.style.display = 'none';
+                    boxAlerta.style.display = 'block';
+                    document.getElementById('sangre-requerida').innerText = datos.tipo_sangre;
+                    document.getElementById('hospital-destino').innerText = datos.hospital;
+                    document.getElementById('donadores-camino').innerText = datos.donadores_en_camino;
+                } else {
+                    // No hay emergencia
+                    formAlerta.style.display = 'flex';
+                    boxAlerta.style.display = 'none';
+                }
+            } catch (e) {
+                console.error("Error revisando emergencias:", e);
+            }
+        }
+
+        async function emitirAlerta() {
+            const sangre = document.getElementById('input-sangre').value;
+            const hospital = document.getElementById('input-hospital').value;
+
+            if (!confirm(`¿Estás seguro de emitir una alerta a todos los celulares pidiendo sangre ${sangre} para el ${hospital}?`)) return;
+
+            try {
+                const res = await fetch('/api/emergencias', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tipo_sangre: sangre, hospital: hospital })
+                });
+
+                if (res.ok) {
+                    revisarEmergencia();
+                } else {
+                    alert("Error al intentar crear la alerta.");
+                }
+            } catch (e) {
+                console.error("Error al emitir alerta:", e);
+            }
+        }
+
+        async function cancelarAlerta() {
+            if (!confirm("¿Deseas finalizar esta emergencia? El contador volverá a cero.")) return;
+
+            try {
+                await fetch('/api/emergencias', { method: 'DELETE' });
+                revisarEmergencia();
+            } catch (e) {
+                console.error("Error al cancelar alerta:", e);
+            }
+        }
+
+        // --- LÓGICA DE LA TABLA (IGUAL QUE ANTES) ---
+        async function actualizarTabla() {
             try {
                 const res = await fetch('/api/donadores');
                 const datos = await res.json();
@@ -180,23 +277,22 @@
                                 <img src="${d.foto}" alt="selfie">
                                 <div>
                                     <strong>${d.nombre}</strong><br>
-                                    <small class="status-tag">Registro App</small>
+                                    <small style="color:var(--text-dim)">📞 ${d.telefono || 'Sin teléfono'} | 🪪 ${d.curp || 'Sin CURP'}</small><br>
+                                    <small class="status-tag">🏠 ${d.domicilio || 'Sin domicilio registrado'}</small>
                                 </div>
                             </div>
                         </td>
                         <td><span class="blood-badge">${d.tipo_sangre || d.tipo || 'N/A'}</span></td>
                         <td>
-                            <a href="https://maps.google.com/?q=${d.lat},${d.lng}" 
+                            <a href="https://www.google.com/maps?q=$${d.lat},${d.lng}" 
                                target="_blank" 
                                rel="noopener noreferrer"
-                               style="background-color: #1f6feb; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                               style="background-color: #1f6feb; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s;">
                                📍 Ver Mapa
                             </a>
                         </td>
                         <td>
-                            <a href="javascript:void(0)" 
-                               onclick="borrarDonador('${d.id}')" 
-                               class="action-delete">Eliminar</a>
+                            <a href="javascript:void(0)" onclick="borrarDonador('${d.id}')" class="action-delete">Eliminar</a>
                         </td>
                     </tr>
                 `).join('');
@@ -205,28 +301,27 @@
             }
         }
 
-        // FUNCIÓN PARA ELIMINAR
         async function borrarDonador(id) {
             if (!confirm("¿Seguro que quieres eliminar este registro?")) return;
-
             try {
-                const res = await fetch(`/api/donadores?id=${id}`, {
-                    method: 'DELETE',
-                });
-
-                if (res.ok) {
-                    actualizar();
-                } else {
-                    alert("Error al intentar eliminar el registro.");
-                }
+                await fetch(`/api/donadores?id=${id}`, { method: 'DELETE' });
+                actualizarTabla();
             } catch (e) {
-                console.error("Error al borrar:", e);
                 alert("No se pudo conectar con el servidor para eliminar.");
             }
         }
 
-        setInterval(actualizar, 15000);
-        actualizar();
+        // Función maestra que actualiza tanto la tabla como el panel de emergencia
+        function actualizarTodo() {
+            actualizarTabla();
+            revisarEmergencia();
+        }
+
+        // Auto-actualizar cada 10 segundos (para ver en tiempo real si alguien va en camino)
+        setInterval(actualizarTodo, 10000);
+        
+        // Carga inicial
+        actualizarTodo();
     </script>
 </body>
 </html>

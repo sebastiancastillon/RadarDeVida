@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:camera/camera.dart';
-import 'package:geolocator/geolocator.dart'; // <--- AGREGAMOS ESTO
+import 'package:geolocator/geolocator.dart'; 
 import 'package:radardevida/app_drawer.dart'; 
 import 'dart:convert'; 
 import 'package:http/http.dart' as http; 
@@ -21,6 +21,11 @@ class _RegistroScreenState extends State<RegistroScreen> {
   String _tipoSangre = "O+";
   final TextEditingController _nombreController = TextEditingController();
   
+  // NUEVOS CONTROLADORES PARA LOS DATOS DEL MAESTRO
+  final TextEditingController _curpController = TextEditingController();
+  final TextEditingController _telefonoController = TextEditingController();
+  final TextEditingController _domicilioController = TextEditingController();
+  
   List<CameraDescription> _cameras = [];
   int _camaraActual = 1;
 
@@ -30,31 +35,23 @@ class _RegistroScreenState extends State<RegistroScreen> {
     _initCamera();
   }
 
-  // --- FUNCIÓN PARA OBTENER LA UBICACIÓN REAL (Manejando permisos) ---
   Future<Position> _determinarPosicion() async {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Verificar si los servicios de ubicación están activados
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('El GPS está desactivado. Actívalo para continuar.');
-    }
+    if (!serviceEnabled) return Future.error('El GPS está desactivado.');
 
-    // Verificar permisos
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Permiso de ubicación denegado.');
-      }
+      if (permission == LocationPermission.denied) return Future.error('Permiso denegado.');
     }
     
     if (permission == LocationPermission.deniedForever) {
-      return Future.error('Permisos de ubicación denegados permanentemente.');
+      return Future.error('Permisos denegados permanentemente.');
     }
 
-    // Si todo está bien, obtenemos la posición actual
     return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
@@ -86,6 +83,9 @@ class _RegistroScreenState extends State<RegistroScreen> {
   void dispose() {
     _controller?.dispose();
     _nombreController.dispose();
+    _curpController.dispose();
+    _telefonoController.dispose();
+    _domicilioController.dispose();
     super.dispose();
   }
 
@@ -178,26 +178,37 @@ class _RegistroScreenState extends State<RegistroScreen> {
                   ),
               ],
             ),
-            const Divider(height: 40),
+            const Divider(height: 30),
+            
+            // --- NUEVOS CAMPOS DE TEXTO ---
             TextField(
               controller: _nombreController,
-              decoration: const InputDecoration(
-                labelText: "Nombre Completo",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person),
-              ),
+              decoration: const InputDecoration(labelText: "Nombre Completo", border: OutlineInputBorder(), prefixIcon: Icon(Icons.person)),
               onChanged: (val) => setState(() {}),
             ),
             const SizedBox(height: 15),
+            TextField(
+              controller: _curpController,
+              textCapitalization: TextCapitalization.characters,
+              decoration: const InputDecoration(labelText: "CURP", border: OutlineInputBorder(), prefixIcon: Icon(Icons.badge)),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: _telefonoController,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(labelText: "Número de Teléfono", border: OutlineInputBorder(), prefixIcon: Icon(Icons.phone)),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: _domicilioController,
+              decoration: const InputDecoration(labelText: "Domicilio Completo", border: OutlineInputBorder(), prefixIcon: Icon(Icons.home)),
+            ),
+            const SizedBox(height: 15),
+            
             DropdownButtonFormField(
               value: _tipoSangre,
-              decoration: const InputDecoration(
-                labelText: "Tipo de Sangre",
-                border: OutlineInputBorder(),
-              ),
-              items: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
-                  .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                  .toList(),
+              decoration: const InputDecoration(labelText: "Tipo de Sangre", border: OutlineInputBorder()),
+              items: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
               onChanged: (val) => setState(() => _tipoSangre = val.toString()),
             ),
             const SizedBox(height: 30),
@@ -205,62 +216,49 @@ class _RegistroScreenState extends State<RegistroScreen> {
               onPressed: (_imageFile == null || _nombreController.text.isEmpty)
                   ? null
                   : () async {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Enviando a Panel de Administración...")),
-                      );
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Enviando datos...")));
 
                       try {
-                        // 1. OBTENER LA UBICACIÓN REAL JUSTO ANTES DE SUBIR
                         Position position = await _determinarPosicion();
-
-                        // 2. Preparar imagen
                         final bytes = await File(_imageFile!.path).readAsBytes();
                         String base64Image = "data:image/png;base64,${base64Encode(bytes)}";
 
                         final url = Uri.parse('https://radar-de-vida-sebastiancastillons-projects.vercel.app/api/donadores');
 
-                        // 3. ENVIAR DATOS CON LATITUD Y LONGITUD
+                        // --- ENVIANDO TODOS LOS DATOS NUEVOS ---
                         final response = await http.post(
                           url,
                           headers: {"Content-Type": "application/json"},
                           body: jsonEncode({
                             "nombre": _nombreController.text,
+                            "curp": _curpController.text,
+                            "telefono": _telefonoController.text,
+                            "domicilio": _domicilioController.text,
                             "tipo_sangre": _tipoSangre,
                             "foto": base64Image,
-                            "lat": position.latitude, // <--- AGREGAMOS LAT
-                            "lng": position.longitude, // <--- AGREGAMOS LNG
+                            "lat": position.latitude,
+                            "lng": position.longitude,
                           }),
                         );
 
                         if (response.statusCode == 201 || response.statusCode == 200) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("✅ ¡Donante registrado con éxito!"),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("✅ Donante registrado"), backgroundColor: Colors.green));
                           setState(() {
                             _imageFile = null;
                             _nombreController.clear(); 
+                            _curpController.clear();
+                            _telefonoController.clear();
+                            _domicilioController.clear();
                             _tipoSangre = "O+";
                           });
                         } else {
                           throw Exception('Error del servidor');
                         }
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("❌ Error al enviar datos: $e"),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("❌ Error: $e"), backgroundColor: Colors.red));
                       }
                     },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
-                backgroundColor: const Color(0xFFB71C1C),
-                foregroundColor: Colors.white,
-              ),
+              style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50), backgroundColor: const Color(0xFFB71C1C), foregroundColor: Colors.white),
               child: const Text("FINALIZAR Y SUBIR"),
             ),
           ],

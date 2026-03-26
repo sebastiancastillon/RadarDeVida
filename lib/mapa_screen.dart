@@ -69,7 +69,7 @@ class _MapaScreenState extends State<MapaScreen> {
                   circles: [
                     CircleMarker(
                       point: _ubicacionActual!,
-                      radius: 2000, // Lo subimos a 2 KM como pediste antes
+                      radius: 8000, // Lo subimos a 8 KM como pediste antes
                       useRadiusInMeter: true,
                       color: Colors.red.withOpacity(0.2),
                       borderColor: Colors.red,

@@ -8,15 +8,19 @@ export default function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (req.method === 'POST') {
-    const { nombre, tipo_sangre, foto } = req.body;
+    // AQUÍ AGREGAMOS LOS NUEVOS CAMPOS DEL MAESTRO
+    const { nombre, curp, telefono, domicilio, tipo_sangre, foto } = req.body;
     
-    // Generar coordenadas aleatorias en Colima (Radio de ~2km usando 0.04)
+    // Generar coordenadas aleatorias en Colima (Radio de ~2km usando 0.04) si no hay GPS
     const lat = req.body.lat || (19.2433 + (Math.random() - 0.5) * 0.04);
     const lng = req.body.lng || (-103.725 + (Math.random() - 0.5) * 0.04);
 
     const nuevoDonador = {
       id: Date.now(),
       nombre,
+      curp,           // Nuevo dato guardado
+      telefono,       // Nuevo dato guardado
+      domicilio,      // Nuevo dato guardado
       tipo_sangre,
       foto,
       fecha: new Date().toLocaleString(),

@@ -58,8 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
           hospital['lng']
         );
 
-        // 3. Verificar si está dentro del radio de 2km (2000 metros)
-        if (distancia <= 2000) {
+        // 3. Verificar si está dentro del radio de 8km (8000 metros)
+        if (distancia <= 8000) {
           if (distancia < menorDistancia) {
             menorDistancia = distancia;
             nombreHosp = hospital['nombre'];
@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _mensajeStatus = "¡ALERTA! El $nombreHosp está a ${menorDistancia.toStringAsFixed(0)}m y necesita donadores.";
         } else {
           _hayEmergencia = false;
-          _mensajeStatus = "No hay solicitudes de sangre en tu radio de 2km.";
+          _mensajeStatus = "No hay solicitudes de sangre en tu radio de 8km.";
         }
       });
     } catch (e) {
